@@ -3,18 +3,14 @@ package tech.techdad.bghivefeeds;
 import com.google.gson.*;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import sun.jvm.hotspot.asm.sparc.SPARCRegisterType;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,11 +23,15 @@ public class AuthHelper {
 
     public static String getSessionID(Map<String, String> connection) {
 
+        // these values should come from the map built in the property helper
         String bgUsername = connection.get("Username");
         String bgPassword = connection.get("Password");
         String bgConnectUrl = connection.get("URL");
+
+        // what we ultimatley want to return
         String sessionID = null;
 
+        // Request body needs a session object to get the sessionID
         Map<String, ArrayList<Map>> session = new HashMap<>();
         ArrayList<Map> objects = new ArrayList<>();
         Map<String, String> credentials = new HashMap<>();
@@ -42,20 +42,15 @@ public class AuthHelper {
 
         objects.add(credentials);
 
+        // make the Map containing the object Array
         session.put("sessions", objects);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
 
-            CredentialsProvider provider = new BasicCredentialsProvider();
-            UsernamePasswordCredentials httpCredentials = new UsernamePasswordCredentials(bgUsername, bgPassword);
-            provider.setCredentials(AuthScope.ANY, httpCredentials);
-
-            HttpClientContext context = HttpClientContext.create();
-            context.setCredentialsProvider(provider);
-
+            // BG Hive API just accepts JSON with credentials
+            // so we convert the Map to JSON wuth GsonBuilder
             GsonBuilder builder = new GsonBuilder();
             Gson gson = builder.create();
-            String json = gson.toJson(session);
 
             String bgSessionUrl = bgConnectUrl + "/auth/sessions";
             LOGGER.debug(bgSessionUrl);
@@ -71,58 +66,70 @@ public class AuthHelper {
             post.addHeader("X-Omnia-Client", "BGHiveFeeds");
 
             HttpResponse response = httpClient.execute(post);
+            int responseCode = response.getStatusLine().getStatusCode();
 
-            HttpEntity entity = response.getEntity();
+            LOGGER.debug(responseCode);
+
+            if (responseCode == 200) {
+
+                HttpEntity entity = response.getEntity();
 
 
-            if (entity != null) {
-                    String content =  EntityUtils.toString(entity);
+                if (entity != null) {
+                    String content = EntityUtils.toString(entity);
 
                     JsonParser jsonParser = new JsonParser();
 
                     JsonElement jsonTree = jsonParser.parse(content);
 
-                    LOGGER.debug(jsonTree);
+                    if (jsonTree.isJsonObject()) {
 
-                    if(jsonTree.isJsonObject()) {
                         JsonObject jsonObject = jsonTree.getAsJsonObject();
-
-                        LOGGER.debug(jsonObject);
-
                         JsonElement sessionObject = jsonObject.get("sessions");
                         JsonArray sessionArray = sessionObject.getAsJsonArray();
-
-                        LOGGER.debug(sessionArray.isJsonArray());
-                        LOGGER.debug(sessionArray);
-
                         JsonElement sessionArrayKey = sessionArray.get(0);
-
-                        LOGGER.debug(sessionArrayKey);
-
                         JsonObject sessionArrayObject = sessionArrayKey.getAsJsonObject();
-
-                        LOGGER.debug(sessionArrayObject);
-
                         sessionID = sessionArrayObject.get("sessionId").getAsString();
-
-                        LOGGER.debug(sessionID);
 
                         return sessionID;
 
+                    } else {
+                        LOGGER.error("Response received from API did not parse correctly");
                     }
+                }
 
+            } else {
+
+                LOGGER.error("Non-200 HTTP response recieved");
+                LOGGER.error(responseCode);
             }
 
         } catch (IOException e) {
-            LOGGER.debug(e.getMessage());
+
+            LOGGER.error(e.getMessage());
+
         } finally {
-            LOGGER.debug("end");
+
+            LOGGER.debug(sessionID);
+
         }
 
         return sessionID;
     }
 
+    public static Map<String, String> getHttpHeaders(String sessionID){
 
+        Map<String, String> httpHeaders = new HashMap<>();
+
+        httpHeaders.put("Content-type", "application/vnd.alertme.zoo-6.6+json");
+        httpHeaders.put("Accept","application/vnd.alertme.zoo-6.6+json");
+        httpHeaders.put("X-Omnia-Client", "BGHiveFeeds");
+        httpHeaders.put("X-Omnia-Access-Token", sessionID);
+
+        LOGGER.debug(httpHeaders);
+
+        return httpHeaders;
+    }
 
 
 }

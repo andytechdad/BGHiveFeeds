@@ -2,6 +2,9 @@ package tech.techdad.bghivefeeds;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.message.ParameterizedMessage;
+
+import java.util.HashMap;
 import java.util.Map;
 
 public class BGHiveFeeds {
@@ -10,13 +13,21 @@ public class BGHiveFeeds {
 
     public static void main(String[] arguments) {
 
-        PropertyHelper property = new PropertyHelper();
-        AuthHelper auth = new AuthHelper();
+        Map<String, String> connection = PropertyHelper.getConnection();
+        String session = AuthHelper.getSessionID(connection);
 
-        Map<String, String> connection = property.getConnection();
-        String session = auth.getSessionID(connection);
+        if (session !=null) {
+            LOGGER.debug(new ParameterizedMessage("Session Initialized with Session ID:{}", session));
 
-        LOGGER.debug(session);
+            Map<String, String> sessionHeaders = AuthHelper.getHttpHeaders(session);
+
+            LOGGER.debug(sessionHeaders);
+
+            HashMap<String, String> nodes = Nodes.getNodes(sessionHeaders);
+
+            LOGGER.debug(nodes);
+
+        }
     }
 
 }
