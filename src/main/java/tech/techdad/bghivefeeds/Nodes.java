@@ -1,5 +1,9 @@
 package tech.techdad.bghivefeeds;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -10,7 +14,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +21,7 @@ public class Nodes {
 
     private static final Logger LOGGER = LogManager.getLogger(Nodes.class);
 
-    public static HashMap<String, String> getNodes(Map<String, String> session) {
+    static HashMap<String, String> getNodes(Map<String, String> session) {
 
         String url = PropertyHelper.getBgHiveURL();
         String content = session.get("Content-type");
@@ -48,10 +51,24 @@ public class Nodes {
             String responseBody = EntityUtils.toString(responseStream);
             int responseCode = response.getStatusLine().getStatusCode();
 
-            LOGGER.debug(responseCode);
-            LOGGER.debug(responseText);
-            LOGGER.debug(responseStream);
-            LOGGER.debug(responseBody);
+            if (responseCode == 200) {
+
+                JsonParser jsonParser = new JsonParser();
+
+                JsonElement nodesTree = jsonParser.parse(responseBody);
+                JsonObject nodesObject = nodesTree.getAsJsonObject();
+                JsonElement nodesList = nodesObject.get("nodes");
+                JsonArray nodesArray = nodesList.getAsJsonArray();
+                int nodesLength = nodesArray.size();
+
+                for (int nodeLength = 0; nodeLength < nodesLength; nodeLength++) {
+                    JsonElement nodesArrayKey = nodesArray.get(nodeLength);
+                    JsonObject nodesArrayObject = nodesArrayKey.getAsJsonObject();
+                    JsonElement nodeName = nodesArrayObject.get("name");
+                    LOGGER.debug(nodeName);
+                }
+
+            }
 
 
         }  catch (IOException e) {

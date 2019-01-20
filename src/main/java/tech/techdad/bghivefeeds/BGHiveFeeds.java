@@ -13,7 +13,10 @@ public class BGHiveFeeds {
 
     public static void main(String[] arguments) {
 
+        // Need username, password and URL from properties
         Map<String, String> connection = PropertyHelper.getConnection();
+
+        // Make initial connection to get the session ID / Access-Token
         String session = AuthHelper.getSessionID(connection);
 
         if (session !=null) {

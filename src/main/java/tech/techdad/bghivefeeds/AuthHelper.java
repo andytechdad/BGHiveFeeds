@@ -21,7 +21,7 @@ public class AuthHelper {
 
     private static final Logger LOGGER = LogManager.getLogger(AuthHelper.class);
 
-    public static String getSessionID(Map<String, String> connection) {
+    static String getSessionID(Map<String, String> connection) {
 
         // these values should come from the map built in the property helper
         String bgUsername = connection.get("Username");
@@ -74,7 +74,6 @@ public class AuthHelper {
 
                 HttpEntity entity = response.getEntity();
 
-
                 if (entity != null) {
                     String content = EntityUtils.toString(entity);
 
@@ -117,7 +116,7 @@ public class AuthHelper {
         return sessionID;
     }
 
-    public static Map<String, String> getHttpHeaders(String sessionID){
+    static Map<String, String> getHttpHeaders(String sessionID){
 
         Map<String, String> httpHeaders = new HashMap<>();
 
