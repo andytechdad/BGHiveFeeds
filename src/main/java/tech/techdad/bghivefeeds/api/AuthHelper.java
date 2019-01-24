@@ -1,4 +1,4 @@
-package tech.techdad.bghivefeeds;
+package tech.techdad.bghivefeeds.api;
 
 import com.google.gson.*;
 import org.apache.http.HttpEntity;
@@ -10,6 +10,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tech.techdad.bghivefeeds.PropertyHelper;
 
 import java.io.IOException;
 import java.util.ArrayList;

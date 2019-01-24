@@ -1,4 +1,4 @@
-package tech.techdad.bghivefeeds;
+package tech.techdad.bghivefeeds.api;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -13,6 +13,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.ParameterizedMessage;
+import tech.techdad.bghivefeeds.PropertyHelper;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -51,6 +52,7 @@ public class Channels {
             get.addHeader(ACCEPT, accept);
             get.addHeader(CLIENT, omniaClient);
             get.addHeader(TOKEN, omniaAccessToken);
+
 
             HttpResponse response = httpClient.execute(get);
             String responseText = response.toString();
