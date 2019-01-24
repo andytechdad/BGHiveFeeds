@@ -6,6 +6,7 @@ import org.apache.logging.log4j.message.ParameterizedMessage;
 import tech.techdad.bghivefeeds.api.AuthHelper;
 import tech.techdad.bghivefeeds.api.Channels;
 import tech.techdad.bghivefeeds.api.Nodes;
+import tech.techdad.bghivefeeds.api.Temperature;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +40,12 @@ public class BGHiveFeeds {
             String channels = channel.getTemperatureChannel(sessionHeaders);
 
             LOGGER.debug(channels);
+
+            Temperature temperature = new Temperature();
+
+            int currentTemp = temperature.getCurrentTemperature(sessionHeaders, channels);
+
+            LOGGER.debug(currentTemp);
 
         }
     }

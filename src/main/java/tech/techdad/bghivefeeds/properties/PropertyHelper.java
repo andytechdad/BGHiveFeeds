@@ -1,4 +1,4 @@
-package tech.techdad.bghivefeeds;
+package tech.techdad.bghivefeeds.properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
