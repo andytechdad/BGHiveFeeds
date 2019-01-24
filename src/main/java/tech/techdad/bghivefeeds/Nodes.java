@@ -19,11 +19,13 @@ import java.util.Map;
 
 public class Nodes {
 
-    private static final Logger LOGGER = LogManager.getLogger(Nodes.class);
+    private static final Logger LOGGER = LogManager.getLogger();
 
-    static HashMap<String, String> getNodes(Map<String, String> session) {
+    public HashMap<String, String> getNodes(Map<String, String> session) {
 
-        String url = PropertyHelper.getBgHiveURL();
+        PropertyHelper prop = new PropertyHelper();
+
+        String url = prop.getBgHiveURL();
         String content = session.get("Content-type");
         String accept = session.get("Accept");
         String omniaClient = session.get("X-Omnia-Client");

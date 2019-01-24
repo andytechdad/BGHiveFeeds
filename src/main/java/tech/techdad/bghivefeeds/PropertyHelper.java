@@ -13,9 +13,9 @@ import java.util.Properties;
 
 public class PropertyHelper {
 
-    private static final Logger LOGGER = LogManager.getLogger(PropertyHelper.class);
+    private static final Logger LOGGER = LogManager.getLogger();
 
-    public static Map<String, String> getConnection() {
+    public Map<String, String> getConnection() {
         Properties prop = new Properties();
 
         InputStream input = null;
@@ -50,7 +50,7 @@ public class PropertyHelper {
         return dictionary;
     }
 
-    public static String getBgHiveURL() {
+    public String getBgHiveURL() {
 
         Properties prop = new Properties();
         String url = null;

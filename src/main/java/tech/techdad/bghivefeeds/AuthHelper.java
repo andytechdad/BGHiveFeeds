@@ -10,7 +10,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import sun.jvm.hotspot.asm.sparc.SPARCRegisterType;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,9 +18,18 @@ import java.util.Map;
 
 public class AuthHelper {
 
-    private static final Logger LOGGER = LogManager.getLogger(AuthHelper.class);
+    private static final Logger LOGGER = LogManager.getLogger();
+    // final Strings
+    private static final String CONTENT = "application/vnd.alertme.zoo-6.6+json";
+    private static final String ACCEPT = "application/vnd.alertme.zoo-6.6+json";
+    private static final String CLIENT = "BGHiveFeeds";
 
-    static String getSessionID(Map<String, String> connection) {
+    public String getSessionID() {
+
+        PropertyHelper prop = new PropertyHelper();
+
+        // Need username, password and URL from properties
+        Map<String, String> connection = prop.getConnection();
 
         // these values should come from the map built in the property helper
         String bgUsername = connection.get("Username");
@@ -61,9 +69,9 @@ public class AuthHelper {
 
             post.setEntity(postingString);
 
-            post.addHeader("Content-type", "application/vnd.alertme.zoo-6.6+json");
-            post.addHeader("Accept","application/vnd.alertme.zoo-6.6+json");
-            post.addHeader("X-Omnia-Client", "BGHiveFeeds");
+            post.addHeader("Content-type", CONTENT );
+            post.addHeader("Accept", ACCEPT);
+            post.addHeader("X-Omnia-Client", CLIENT);
 
             HttpResponse response = httpClient.execute(post);
             int responseCode = response.getStatusLine().getStatusCode();
@@ -116,13 +124,13 @@ public class AuthHelper {
         return sessionID;
     }
 
-    static Map<String, String> getHttpHeaders(String sessionID){
+    public Map<String, String> getHttpHeaders(String sessionID){
 
         Map<String, String> httpHeaders = new HashMap<>();
 
-        httpHeaders.put("Content-type", "application/vnd.alertme.zoo-6.6+json");
-        httpHeaders.put("Accept","application/vnd.alertme.zoo-6.6+json");
-        httpHeaders.put("X-Omnia-Client", "BGHiveFeeds");
+        httpHeaders.put("Content-type", CONTENT);
+        httpHeaders.put("Accept", ACCEPT);
+        httpHeaders.put("X-Omnia-Client", CLIENT);
         httpHeaders.put("X-Omnia-Access-Token", sessionID);
 
         LOGGER.debug(httpHeaders);
