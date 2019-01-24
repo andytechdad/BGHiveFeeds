@@ -7,7 +7,7 @@ make use of data.
 
 ## Initial Functionality
 
-* TODO read properties and login to BG Hive API
+* read properties and login to BG Hive API
 
 * TODO find heating device and get house temperature
 

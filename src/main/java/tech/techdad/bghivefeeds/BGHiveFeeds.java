@@ -31,6 +31,12 @@ public class BGHiveFeeds {
 
             LOGGER.debug(nodes);
 
+            Channels channel = new Channels();
+
+            HashMap<String, String> channels = channel.getChannels(sessionHeaders);
+
+            LOGGER.debug(channels);
+
         }
     }
 
