@@ -1,13 +1,19 @@
 package tech.techdad.bghivefeeds.api;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.message.ParameterizedMessage;
 import tech.techdad.bghivefeeds.properties.PropertyHelper;
 
 import java.io.IOException;
@@ -52,7 +58,7 @@ public class Temperature {
 
                 LOGGER.debug(timeNow);
 
-                long timeThen = timeNow - 240000;
+                long timeThen = timeNow - 2400000;
 
                 LOGGER.debug(timeThen);
 
@@ -67,13 +73,35 @@ public class Temperature {
                 get.addHeader(CLIENT, omniaClient);
                 get.addHeader(TOKEN, omniaAccessToken);
 
-                HttpResponse response = httpClient.execute(get);
-                String responseText = response.toString();
-                HttpEntity responseStream = response.getEntity();
-                String responseBody = EntityUtils.toString(responseStream);
-                int responseCode = response.getStatusLine().getStatusCode();
+                try {
 
-                LOGGER.debug(responseBody);
+                    HttpResponse response = httpClient.execute(get);
+                    String responseText = response.toString();
+                    HttpEntity responseStream = response.getEntity();
+                    String responseBody = EntityUtils.toString(responseStream);
+                    int responseCode = response.getStatusLine().getStatusCode();
+
+                    JsonParser jsonParser = new JsonParser();
+
+                    JsonElement temperatureTree = jsonParser.parse(responseBody);
+                    JsonObject temperatureObject = temperatureTree.getAsJsonObject();
+                    JsonElement temperatureChannels = temperatureObject.get("channels");
+                    JsonArray temperatureValuesArray = temperatureChannels.getAsJsonArray();
+                    JsonElement temperatureValuesKey = temperatureValuesArray.get(0);
+                    JsonObject temperatureValuesObject = temperatureValuesKey.getAsJsonObject();
+                    JsonElement temperatureValuesMap = temperatureValuesObject.get("values");
+                    JsonObject temperatureValues = temperatureValuesMap.getAsJsonObject();
+
+                    for (String temperatureKey : temperatureValues.keySet()) {
+                        long keyEpoch = Long.parseLong(temperatureKey);
+                        JsonElement valueTemperature = temperatureValues.get(temperatureKey);
+                        LOGGER.info(new ParameterizedMessage("TIME: {} TEMP: {}",keyEpoch, valueTemperature));
+                    }
+                    
+                } catch (HttpResponseException e) {
+
+                    LOGGER.error(e);
+                }
 
             }  catch (ParseException e) {
 
