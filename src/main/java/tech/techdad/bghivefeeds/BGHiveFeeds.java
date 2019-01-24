@@ -33,7 +33,7 @@ public class BGHiveFeeds {
 
             Channels channel = new Channels();
 
-            HashMap<String, String> channels = channel.getChannels(sessionHeaders);
+            String channels = channel.getTemperatureChannel(sessionHeaders);
 
             LOGGER.debug(channels);
 

@@ -21,16 +21,20 @@ import java.util.Map;
 public class Channels {
 
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final String CONTENT = "Content-type";
+    private static final String ACCEPT = "Accept";
+    private static final String CLIENT = "X-Omnia-Client";
+    private static final String TOKEN = "X-Omnia-Access-Token";
 
     public HashMap<String, String> getChannels(Map<String, String> session) {
 
         PropertyHelper prop = new PropertyHelper();
 
         String url = prop.getBgHiveURL();
-        String content = session.get("Content-type");
-        String accept = session.get("Accept");
-        String omniaClient = session.get("X-Omnia-Client");
-        String omniaAccessToken = session.get("X-Omnia-Access-Token");
+        String content = session.get(CONTENT);
+        String accept = session.get(ACCEPT);
+        String omniaClient = session.get(CLIENT);
+        String omniaAccessToken = session.get(TOKEN);
 
         HashMap<String, String> channels = new HashMap<>();
 
@@ -41,12 +45,12 @@ public class Channels {
             String bgChannelsUrl = url + "/channels";
             LOGGER.debug(bgChannelsUrl);
 
-            HttpGet get          = new HttpGet(bgChannelsUrl);
+            HttpGet get = new HttpGet(bgChannelsUrl);
 
-            get.addHeader("Content-type", content);
-            get.addHeader("Accept",accept);
-            get.addHeader("X-Omnia-Client", omniaClient);
-            get.addHeader("X-Omnia-Access-Token", omniaAccessToken);
+            get.addHeader(CONTENT, content);
+            get.addHeader(ACCEPT, accept);
+            get.addHeader(CLIENT, omniaClient);
+            get.addHeader(TOKEN, omniaAccessToken);
 
             HttpResponse response = httpClient.execute(get);
             String responseText = response.toString();
@@ -75,7 +79,7 @@ public class Channels {
             }
 
 
-        }  catch (IOException e) {
+        } catch (IOException e) {
 
             LOGGER.error(e.getMessage());
 
@@ -83,4 +87,71 @@ public class Channels {
 
         return channels;
     }
+
+    public String getTemperatureChannel(Map<String, String> session) {
+
+        PropertyHelper prop = new PropertyHelper();
+
+        String url = prop.getBgHiveURL();
+        String content = session.get(CONTENT);
+        String accept = session.get(ACCEPT);
+        String omniaClient = session.get(CLIENT);
+        String omniaAccessToken = session.get(TOKEN);
+
+        String temperatureChannel = new String();
+
+        LOGGER.debug(url);
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+
+            String bgChannelsUrl = url + "/channels";
+            LOGGER.debug(bgChannelsUrl);
+
+            HttpGet get = new HttpGet(bgChannelsUrl);
+
+            get.addHeader(CONTENT, content);
+            get.addHeader(ACCEPT, accept);
+            get.addHeader(CLIENT, omniaClient);
+            get.addHeader(TOKEN, omniaAccessToken);
+
+            HttpResponse response = httpClient.execute(get);
+            String responseText = response.toString();
+            HttpEntity responseStream = response.getEntity();
+            String responseBody = EntityUtils.toString(responseStream);
+            int responseCode = response.getStatusLine().getStatusCode();
+
+            if (responseCode == 200) {
+
+                JsonParser jsonParser = new JsonParser();
+
+                JsonElement channelsTree = jsonParser.parse(responseBody);
+                JsonObject channelsObject = channelsTree.getAsJsonObject();
+                JsonElement channelsList = channelsObject.get("channels");
+                JsonArray channelsArray = channelsList.getAsJsonArray();
+                int channelsLength = channelsArray.size();
+
+                for (int channelLength = 0; channelLength < channelsLength; channelLength++) {
+                    JsonElement channelsArrayKey = channelsArray.get(channelLength);
+                    JsonObject channelsArrayObject = channelsArrayKey.getAsJsonObject();
+                    String channelName = channelsArrayObject.get("id").getAsString();
+                    if (channelName.startsWith("temperature@")) {
+                        LOGGER.debug(new ParameterizedMessage("ID: {}", channelName));
+                        temperatureChannel = channelName;
+                    }
+
+                }
+
+            }
+
+
+        } catch (IOException e) {
+
+            LOGGER.error(e.getMessage());
+
+        }
+
+        return temperatureChannel;
+
+    }
+
 }
