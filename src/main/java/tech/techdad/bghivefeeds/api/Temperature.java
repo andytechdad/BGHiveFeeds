@@ -97,7 +97,7 @@ public class Temperature {
                         JsonElement valueTemperature = temperatureValues.get(temperatureKey);
                         LOGGER.info(new ParameterizedMessage("TIME: {} TEMP: {}",keyEpoch, valueTemperature));
                     }
-                    
+
                 } catch (HttpResponseException e) {
 
                     LOGGER.error(e);

@@ -4,11 +4,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.ParameterizedMessage;
 import tech.techdad.bghivefeeds.api.AuthHelper;
-import tech.techdad.bghivefeeds.api.Channels;
-import tech.techdad.bghivefeeds.api.Nodes;
-import tech.techdad.bghivefeeds.api.Temperature;
+import tech.techdad.bghivefeeds.runtime.TemperatureRunnable;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class BGHiveFeeds {
@@ -29,23 +26,9 @@ public class BGHiveFeeds {
 
             LOGGER.debug(sessionHeaders);
 
-            Nodes node = new Nodes();
+            Thread t = new Thread(new TemperatureRunnable());
 
-            HashMap<String, String> nodes = node.getNodes(sessionHeaders);
-
-            LOGGER.debug(nodes);
-
-            Channels channel = new Channels();
-
-            String channels = channel.getTemperatureChannel(sessionHeaders);
-
-            LOGGER.debug(channels);
-
-            Temperature temperature = new Temperature();
-
-            int currentTemp = temperature.getCurrentTemperature(sessionHeaders, channels);
-
-            LOGGER.debug(currentTemp);
+            t.start();
 
         }
     }
