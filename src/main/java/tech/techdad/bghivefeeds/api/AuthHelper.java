@@ -10,6 +10,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.message.ParameterizedMessage;
 import tech.techdad.bghivefeeds.properties.PropertyHelper;
 
 import java.io.IOException;
@@ -62,7 +63,8 @@ public class AuthHelper {
             Gson gson = builder.create();
 
             String bgSessionUrl = bgConnectUrl + "/auth/sessions";
-            LOGGER.debug(bgSessionUrl);
+
+            LOGGER.debug(new ParameterizedMessage("Making HTTP call to {}", bgSessionUrl));
 
             HttpPost post          = new HttpPost(bgSessionUrl);
 
@@ -75,6 +77,7 @@ public class AuthHelper {
             post.addHeader("X-Omnia-Client", CLIENT);
 
             HttpResponse response = httpClient.execute(post);
+
             int responseCode = response.getStatusLine().getStatusCode();
 
             LOGGER.debug(responseCode);

@@ -8,9 +8,10 @@ import tech.techdad.bghivefeeds.api.Channels;
 import tech.techdad.bghivefeeds.api.Temperature;
 
 import java.util.Map;
+import java.util.TimerTask;
 
 
-public class TemperatureRunnable implements Runnable {
+public class TemperatureRunnable extends TimerTask {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -20,11 +21,9 @@ public class TemperatureRunnable implements Runnable {
     @Override
     public void run() {
         LOGGER.debug("Starting thread...");
-        LOGGER.debug(sessionId);
+        LOGGER.debug(new ParameterizedMessage("Session Initialized with Session ID:{}", sessionId));
 
         if (sessionId != null) {
-
-            LOGGER.debug(new ParameterizedMessage("Session Initialized with Session ID:{}", sessionId));
 
             Map<String, String> sessionHeaders = auth.getHttpHeaders(sessionId);
 
@@ -34,9 +33,9 @@ public class TemperatureRunnable implements Runnable {
 
             Temperature temp = new Temperature();
 
-            int currenttemp = temp.getCurrentTemperature(sessionHeaders, tempChannel);
+            int currentTemp = temp.getCurrentTemperature(sessionHeaders, tempChannel);
 
-            LOGGER.debug(currenttemp);
+            LOGGER.debug(currentTemp);
 
         }
     }

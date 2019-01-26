@@ -7,6 +7,7 @@ import tech.techdad.bghivefeeds.api.AuthHelper;
 import tech.techdad.bghivefeeds.runtime.TemperatureRunnable;
 
 import java.util.Map;
+import java.util.Timer;
 
 public class BGHiveFeeds {
 
@@ -20,15 +21,16 @@ public class BGHiveFeeds {
         String session = auth.getSessionID();
 
         if (session !=null) {
+
             LOGGER.debug(new ParameterizedMessage("Session Initialized with Session ID:{}", session));
 
             Map<String, String> sessionHeaders = auth.getHttpHeaders(session);
 
             LOGGER.debug(sessionHeaders);
 
-            Thread t = new Thread(new TemperatureRunnable());
+            Timer timer = new Timer();
 
-            t.start();
+            timer.schedule(new TemperatureRunnable(), 0, 10000);
 
         }
     }

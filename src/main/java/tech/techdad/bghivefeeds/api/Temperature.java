@@ -58,7 +58,7 @@ public class Temperature {
 
                 LOGGER.debug(timeNow);
 
-                long timeThen = timeNow - 2400000;
+                long timeThen = timeNow - 100000;
 
                 LOGGER.debug(timeThen);
 
