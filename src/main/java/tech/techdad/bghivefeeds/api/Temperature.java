@@ -31,9 +31,9 @@ public class Temperature {
     private static final String CLIENT = "X-Omnia-Client";
     private static final String TOKEN = "X-Omnia-Access-Token";
 
-    public int getCurrentTemperature(Map<String, String> session, String channel) {
+    public float getCurrentTemperature(Map<String, String> session, String channel) {
 
-        int temperature = 0;
+        float temperature = 0;
 
         //hive_url + "/channels/" + id + "?start=" + timethen + "&end=" + timenow + "&timeUnit=MINUTES&rate=1&operation=MAX"
 
@@ -48,7 +48,7 @@ public class Temperature {
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
 
             Date today = Calendar.getInstance().getTime();
-            SimpleDateFormat temperatureDate = new SimpleDateFormat("MMM dd yyyy HH:mm:ss.SSS zzz");
+            SimpleDateFormat temperatureDate = new SimpleDateFormat("MMM dd yyyy HH:mm:ss");
             String currentTime = temperatureDate.format(today);
             try {
 
@@ -81,33 +81,42 @@ public class Temperature {
                     String responseBody = EntityUtils.toString(responseStream);
                     int responseCode = response.getStatusLine().getStatusCode();
 
-                    JsonParser jsonParser = new JsonParser();
+                    if (responseCode == 200) {
 
-                    JsonElement temperatureTree = jsonParser.parse(responseBody);
-                    JsonObject temperatureObject = temperatureTree.getAsJsonObject();
-                    JsonElement temperatureChannels = temperatureObject.get("channels");
-                    JsonArray temperatureValuesArray = temperatureChannels.getAsJsonArray();
-                    JsonElement temperatureValuesKey = temperatureValuesArray.get(0);
-                    JsonObject temperatureValuesObject = temperatureValuesKey.getAsJsonObject();
-                    JsonElement temperatureValuesMap = temperatureValuesObject.get("values");
-                    JsonObject temperatureValues = temperatureValuesMap.getAsJsonObject();
+                        JsonParser jsonParser = new JsonParser();
 
-                    for (String temperatureKey : temperatureValues.keySet()) {
-                        long keyEpoch = Long.parseLong(temperatureKey);
-                        JsonElement valueTemperature = temperatureValues.get(temperatureKey);
-                        LOGGER.info(new ParameterizedMessage("TIME: {} TEMP: {}",keyEpoch, valueTemperature));
+                        JsonElement temperatureTree = jsonParser.parse(responseBody);
+                        JsonObject temperatureObject = temperatureTree.getAsJsonObject();
+                        JsonElement temperatureChannels = temperatureObject.get("channels");
+                        JsonArray temperatureValuesArray = temperatureChannels.getAsJsonArray();
+                        JsonElement temperatureValuesKey = temperatureValuesArray.get(0);
+                        JsonObject temperatureValuesObject = temperatureValuesKey.getAsJsonObject();
+                        JsonElement temperatureValuesMap = temperatureValuesObject.get("values");
+                        JsonObject temperatureValues = temperatureValuesMap.getAsJsonObject();
+
+                        for (String temperatureKey : temperatureValues.keySet()) {
+                            long keyEpoch = Long.parseLong(temperatureKey);
+                            JsonElement valueTemperature = temperatureValues.get(temperatureKey);
+                            String temperatureFinal = valueTemperature.getAsString();
+                            LOGGER.info(new ParameterizedMessage("TIME: {} TEMP: {}", keyEpoch, valueTemperature));
+                            temperature = Float.parseFloat(temperatureFinal);
+                        }
+
+                    } else {
+
+                        LOGGER.debug("Temperature not found in poll");
                     }
 
-                } catch (HttpResponseException e) {
+                    } catch(HttpResponseException e){
+
+                        LOGGER.error(e);
+                    }
+
+                } catch (ParseException e) {
 
                     LOGGER.error(e);
+
                 }
-
-            }  catch (ParseException e) {
-
-            LOGGER.error(e);
-
-            }
 
         } catch (IOException e) {
 

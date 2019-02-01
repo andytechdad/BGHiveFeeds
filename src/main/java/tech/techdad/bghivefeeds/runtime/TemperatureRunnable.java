@@ -33,7 +33,7 @@ public class TemperatureRunnable extends TimerTask {
 
             Temperature temp = new Temperature();
 
-            int currentTemp = temp.getCurrentTemperature(sessionHeaders, tempChannel);
+            float currentTemp = temp.getCurrentTemperature(sessionHeaders, tempChannel);
 
             LOGGER.debug(currentTemp);
 
