@@ -1,0 +1,7 @@
+application.properties
+bghivefeeds.debug.log
+out/
+.gradle/
+.idea/
+build/
+logs/
